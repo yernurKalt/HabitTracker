@@ -6,7 +6,7 @@ from app.HabitLogs.schemas import HabitLog
 from app.Habits.schemas import Habit
 
 
-habits: List[Habit] = []
+habits: dict[int, Habit] = dict()
 logs: List[HabitLog] = []
 habit_id_counter = 1
 log_id_counter = 1
