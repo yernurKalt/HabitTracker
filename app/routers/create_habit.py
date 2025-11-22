@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from app import storage
 from app.Habits.schemas import Habit
-from app.helpers.helpers import get_habit_or_404
+from app.helpers.helpers import HabitDAO
+from app.helpers.streak import current_streak, longest_streak
 
 
 router = APIRouter(
@@ -45,11 +46,11 @@ def get_all_habits(is_active: bool | None = None) -> List[Habit]:
     
 @router.get("/get/{id}")
 def get_habit_by_id(id: int) -> Habit:
-    return get_habit_or_404(id)
+    return HabitDAO.find_by_id_or_404(id)
         
 @router.put("/update/{id}")
 def update_habit(id: int, name: str | None = None, description: str | None = None, goal_per_day: int | None = None) -> Habit:
-    habit = get_habit_or_404(id)
+    habit = HabitDAO.find_by_id_or_404(id)
     habit.name = name
     habit.description = description
     habit.goal_per_day = goal_per_day
@@ -57,11 +58,19 @@ def update_habit(id: int, name: str | None = None, description: str | None = Non
 
 @router.patch("/{id}/archieve")
 def deactivate_habit(id: int) -> Habit:
-    habit = get_habit_or_404(id)
+    habit = HabitDAO.find_by_id_or_404(id)
     habit.is_active = False
     return habit
 
 @router.delete("/delete/{id}")
 def delete_habit(id: int):
-    habit = get_habit_or_404(id)
+    habit = HabitDAO.find_by_id_or_404(id)
     return storage.habits.pop(habit.id)
+
+@router.get("/{habit_id}/streak")
+def get_streak(habit_id: int):
+    if habit_id not in storage.log_dates_by_habit_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Log not found")
+    c_streak = current_streak(storage.log_dates_by_habit_id[habit_id])
+    l_streak = longest_streak(storage.log_dates_by_habit_id[habit_id])
+    return {"Habit ID": habit_id, "Current streak": f"{c_streak} days", "Longest streak": f"{l_streak} days"}
