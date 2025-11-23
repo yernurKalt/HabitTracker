@@ -31,7 +31,7 @@ def add_log(habit_id: int, date: date, count: int):
     storage.logs[log_id] = habit_log
     for key in storage.habits.keys():
         only_dates = sorted(set(map(lambda x: x.date, create_logs_by_habit_id(key))))
-        storage.log_dates_by_habit_id[habit_id] = only_dates
+        storage.log_dates_by_habit_id[key] = only_dates
     return habit_log
 
 @router.get("/{id}")
