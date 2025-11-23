@@ -35,9 +35,9 @@ def add_log(habit_id: int, date: date, count: int):
     return habit_log
 
 @router.get("/{id}")
-def find_logs_by_id(habit_id: int | None = None) -> List[HabitLog]:
+def find_logs_by_id(id: int | None = None) -> List[HabitLog]:
     logs_by_habit_id: List[HabitLog] = []
-    if habit_id is None:
+    if id is None:
         logs_by_habit_id = storage.logs.values()
         return logs_by_habit_id
-    return create_logs_by_habit_id(habit_id)
+    return create_logs_by_habit_id(int(id))
